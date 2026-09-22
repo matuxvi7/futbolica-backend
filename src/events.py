@@ -5,6 +5,7 @@ from flask_socketio import SocketIO, emit, join_room, leave_room
 from src.config import Config
 from src.extensions import db
 from src.models import User
+from src.services.match_manager import match_manager
 
 
 socketio = SocketIO(cors_allowed_origins="*")
@@ -100,4 +101,44 @@ def handle_join_match_room(data):
                 "username": user_info["username"],
             },
             to=match_id,
+        )
+
+@socketio.on("submit_move")
+def handle_submit_move(data):
+    """Procesa una jugada enviada por el cliente y notifica a la sala."""
+    match_id = data.get("match_id")
+    move_payload = data.get("move")
+
+    user_info = CONNECTED_USERS.get(request.sid)
+
+    if not match_id or not user_info:
+        return
+
+    player_id = user_info["user_id"]
+
+    match = match_manager.get_match(match_id)
+
+    if not match:
+        emit("error", {"message": "Partida no encontrada"})
+        return
+
+    result = match.submit_move(player_id, move_payload)
+
+    if result["success"]:
+        # Transmitir el nuevo estado de la jugada a ambos jugadores en la sala
+        emit(
+            "move_processed",
+            {
+                "player_id": player_id,
+                "username": user_info["username"],
+                "move": move_payload,
+                "next_turn": result["next_turn"],
+                "time_remaining": result["time_remaining"],
+            },
+            to=match_id,
+        )
+    else:
+        emit(
+            "move_rejected",
+            {"reason": result["reason"]},
         )
