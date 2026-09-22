@@ -146,3 +146,44 @@ def register_cli_commands(app: Flask) -> None:
                 "❌ No se pudo generar un enigma "
                 "con los candidatos actuales."
             )
+
+    @app.cli.command("test-elo")
+    def test_elo_command():
+        """Simula una partida entre dos usuarios y muestra el ajuste de Elo."""
+        from src.models import User
+        from src.services.elo import update_match_elo
+
+        users = User.query.limit(2).all()
+
+        if len(users) < 2:
+            print("❌ Se necesitan al menos 2 usuarios en la DB. Registra otro con /register.")
+            return
+
+        u1, u2 = users[0], users[1]
+
+        print(
+            f"🎮 Simulando victoria de {u1.username} "
+            f"({u1.elo_rating} Elo) contra "
+            f"{u2.username} ({u2.elo_rating} Elo)..."
+        )
+
+        res = update_match_elo(
+            str(u1.id),
+            str(u2.id),
+            result_a=1.0,
+        )
+
+        if res:
+            print(
+                f"✅ {res['player_a']['username']}: "
+                f"{res['player_a']['old_elo']} ➡️ "
+                f"{res['player_a']['new_elo']} "
+                f"({res['player_a']['change']:+d})"
+            )
+
+            print(
+                f"❌ {res['player_b']['username']}: "
+                f"{res['player_b']['old_elo']} ➡️ "
+                f"{res['player_b']['new_elo']} "
+                f"({res['player_b']['change']:+d})"
+            )
