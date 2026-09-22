@@ -1,0 +1,108 @@
+ENUNCIADO DE PROYECTO
+Plataforma Competitiva de Lógica Futbolística: "El
+Conector"
+Versión: 1.0 (MVP) | Tipo: Producto Web / Plataforma Competitiva 1v1 | Objetivo: Validar el
+Bucle Central y Retención
+1. Visión y Tesis del Producto
+Existe un nicho masivo de aficionados al fútbol que consumen contenido de análisis, trivia y
+debate, pero que carecen de una plataforma donde demostrar su dominio y capacidad
+analítica en un entorno verdaderamente competitivo.
+Las experiencias existentes (trivia tradicional de opción múltiple $A, B, C, D$) sufren de dos
+grandes fallos:
+1. Son memorización pasiva ("cuestionarios enmascarados") que aburren rápidamente.
+2. Son altamente vulnerables a trampas mediante búsquedas rápidas o asistentes de
+Inteligencia Artificial.
+Tesis: Transformar el conocimiento futbolístico en un problema de deducción en tiempo real
+y conexión de grafos genera una experiencia de alta tensión mental, resistente a la IA por
+dinámicas de tiempo, y con el potencial de enganchar a los usuarios mediante un sistema de
+reputación (Rating Elo) persistente.
+2. Definición del Juego MVP: "El Conector"
+En lugar de responder preguntas, el juego plantea un enigma de asociación lógica entre dos
+entidades futbolísticas distantes.
+● Mecánica Central: El sistema presenta dos nodos iniciales (Ejemplo: Lionel Messi y
+Radamel Falcao, o Boca Juniors 2003 y Bayern Múnich 2020).
+● El Objetivo: Construir el camino más corto entre ambas entidades seleccionando nodos
+interconectores (compañeros de equipo, entrenadores compartidos, traspasos o
+torneos) antes de que se agote el tiempo de la ronda.
+● Resistencia Anti-Trampas (Anti-IA):
+○ Reloj de Ajedrez Rápido: Turnos de 10-12 segundos que penalizan la latencia
+de consultar una IA externa.
+○ Estado de Juego Dinámico: Las opciones de conexión dependen de la ruta
+parcial elegida por el jugador en tiempo real.
+○ Interfaz Visual/Nodal: Selección interactiva sin texto plano para evitar la acción
+de "copiar y pegar".
+3. Alcance Funcional del MVP
+3.1. Registro y Perfil de Jugador
+● Autenticación básica (email, usuario único y contraseña).
+● Perfil público con estadísticas:
+○ Rating Elo Global (Métrica principal de habilidad).
+○ Partidas jugadas, victorias, derrotas y porcentaje de éxito.
+○ Racha actual de victorias y gráfico de evolución de rating.
+3.2. Modo Entrenamiento (Sudden Death)
+● Modo individual sin impacto en el rating.
+● Desafíos de conexiones progresivas con tiempo reduciéndose en cada nivel.
+● Permite al usuario entrenar su "mapa mental" antes de entrar al emparejamiento
+competitivo.
+3.3. Partida Competitiva 1v1
+● Búsqueda de rival mediante matchmaking basado en rangos de Rating Elo.
+● Enfrascamiento a 3 o 5 rondas de "El Conector".
+● Validación en Servidor: El backend es la única autoridad que procesa y valida si los
+nodos conectados son verídicos y calcula los puntos/tiempos.
+● Actualización inmediata del Rating Elo al finalizar el enfrentamiento.
+3.4. Ranking Global
+● Tabla de clasificación pública (Leaderboard) basada en el Rating Elo.
+● Posición del usuario destacada en la interfaz.
+3.5. Base de Datos Relacional y Panel Admin
+● Grafo de datos estructurado en backend: Jugadores, Clubes, Entrenadores,
+Compañeros de Plantel, Torneos.
+● Panel administrativo mínimo para gestionar, verificar o actualizar relaciones entre nodos
+sin tocar código fuente.
+4. Estrategia de Escala y "Laboratorio de Modos"
+(Post-MVP)
+Para evitar la fragmentación de la audiencia y mantener la liquidez del matchmaking, el negocio
+se expandirá bajo la estrategia de Laboratorio de Eventos:
+[ RATING ELO GLOBAL ]
+│
+┌──────────────────┴──────────────────┐
+▼ ▼
+[ MODO PERMANENTE ] [ LABORATORIO ROTATIVO ]
+• El Conector • Fin de semana
+(100% Matchmaking) • Pruebas de nuevas mecánicas
+(Deducción, Mánager, etc.)
+1. Fase MVP: Toda la base de usuarios juega exclusivamente al modo permanente "El
+Conector" para asegurar partidas inmediatas.
+2. Laboratorio de Eventos (Testing In-App): Durante los fines de semana se activa una
+cola secundaria temporal para validar nuevas mecánicas (ej. Deducción Silenciosa o
+Dilema del Mánager).
+3. Criterio de Inclusión: Solo las mecánicas que demuestren una alta tasa de retención
+en el Laboratorio pasarán a ser modos permanentes en la plataforma.
+5. Arquitectura Técnica y Requisitos No Funcionales
+● Frontend: Single Page Application (React / Next.js) optimizada para móvil y desktop.
+● Backend: API REST + WebSockets para la sincronización fluida de la partida 1v1 en
+tiempo real.
+● Base de Datos: PostgreSQL con consultas relacionales estructuradas para el cálculo
+de rutas de grafos.
+● Seguridad y Anticheat:
+○ Servidor como autoridad absoluta de los tiempos y respuestas.
+○ Registro de latencia por turno para detectar la inserción de respuestas vía bots o
+IAs.
+6. Métricas de Validación del MVP
+Métrica Propósito de Validación
+Ratio Registro $\rightarrow$
+Primera Partida
+Evaluar la claridad de la UX y la fricción
+inicial.
+Partidas por Usuario Activo
+(Diario)
+Medir la adicción del Core Loop.
+Retención D1 y D7 Comprobar si el Rating Elo genera un hábito
+de juego.
+Tasa de Abandono de Partida Detectar problemas de balance, tiempo o
+frustración por dificultad.
+7. Criterios de Aceptación del MVP
+● Un jugador puede crear su cuenta y acceder al matchmaking 1v1 en menos de 3 clics.
+● El sistema genera escenarios dinámicos de conexión sin repetir patrones obvios.
+● Dos jugadores disputan una partida sincronizada en tiempo real sin inconsistencias de
+estado.
+● El cálculo de la victoria y la variación de Elo se ejecutan estrictamente en el servidor.
+● La plataforma es totalmente utilizable desde un teléfono móvil.
