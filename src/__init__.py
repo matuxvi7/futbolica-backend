@@ -2,6 +2,7 @@ from flask import Flask
 
 from src.config import Config
 from src.extensions import db, migrate, sock
+import src.models
 
 
 def create_app(config_class: type[Config] = Config) -> Flask:
