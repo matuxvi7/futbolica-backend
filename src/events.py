@@ -142,3 +142,41 @@ def handle_submit_move(data):
             "move_rejected",
             {"reason": result["reason"]},
         )
+
+@socketio.on("round_completed")
+def handle_round_completed(data):
+    """Maneja el fin de una ronda y notifica el avance de ronda o cierre con Elo."""
+    match_id = data.get("match_id")
+    round_winner_id = data.get("winner_id")
+
+    match = match_manager.get_match(match_id)
+
+    if not match:
+        emit("error", {"message": "Partida no encontrada"})
+        return
+
+    result = match.submit_round_win(round_winner_id)
+
+    if result.get("match_status") == "finished":
+        # Transmitir evento de fin de partida con puntajes finales y nuevo Elo
+        emit(
+            "match_finished",
+            {
+                "match_id": match_id,
+                "winner_id": result["winner_id"],
+                "final_scores": result["final_scores"],
+                "elo_update": result["elo_update"],
+            },
+            to=match_id,
+        )
+    else:
+        # Transmitir evento de paso a la siguiente ronda
+        emit(
+            "round_advanced",
+            {
+                "match_id": match_id,
+                "current_round": result["current_round"],
+                "scores": result["scores"],
+            },
+            to=match_id,
+        )
