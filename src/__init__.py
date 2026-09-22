@@ -19,4 +19,9 @@ def create_app(config_class: type[Config] = Config) -> Flask:
     register_routes(app)
     register_realtime_routes(sock)
 
+    @app.cli.command("seed")
+    def seed_command():
+        from src.seeds import seed_db
+        seed_db()
+
     return app
