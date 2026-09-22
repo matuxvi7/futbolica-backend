@@ -12,9 +12,11 @@ leaderboard_bp = Blueprint(
 )
 
 
-# Cache simple en memoria: {"data": [...], "expires_at": timestamp}
+# Cache simple en memoria con totales de paginación
 LEADERBOARD_CACHE = {
     "data": None,
+    "total_users": 0,
+    "total_pages": 0,
     "expires_at": 0,
 }
 
@@ -23,14 +25,25 @@ CACHE_TTL_SECONDS = 60
 
 @leaderboard_bp.route("", methods=["GET"])
 def get_leaderboard():
-    """Devuelve la tabla global de posiciones ordenada por Elo con cache de 60s."""
+    """
+    Obtener Tabla de Clasificación Global (Leaderboard)
+    ---
+    tags:
+    - Leaderboard
+
+    parameters: [{name: page, in: query, type: integer, required: false, default: 1}, {name: limit, in: query, type: integer, required: false, default: 50}]
+
+    responses: {200: {description: Lista de jugadores ordenada por Elo Rating, schema: {type: object, properties: {source: {type: string, example: cache}, page: {type: integer, example: 1}, limit: {type: integer, example: 50}, total_pages: {type: integer, example: 1}, total_users: {type: integer, example: 4}, leaderboard: {type: array, items: {type: object, properties: {id: {type: string, example: "67889e95-c22a-4782-80e1-d364fc138e4d"}, rank: {type: integer, example: 1}, username: {type: string, example: tester_conector}, elo_rating: {type: integer, example: 1216}, stats: {type: object, properties: {wins: {type: integer, example: 1}, losses: {type: integer, example: 0}, matches_played: {type: integer, example: 1}, win_rate_percentage: {type: number, example: 100.0}}}}}}}}}}
+    """
+
+
     now = time.time()
 
     page = request.args.get("page", 1, type=int)
     limit = min(request.args.get("limit", 50, type=int), 100)
 
     # Si la consulta es la página 1 por defecto y la cache está vigente,
-    # responder desde memoria.
+    # responder desde memoria con la estructura completa.
     if (
         page == 1
         and LEADERBOARD_CACHE["data"]
@@ -42,6 +55,8 @@ def get_leaderboard():
                     "source": "cache",
                     "page": 1,
                     "limit": limit,
+                    "total_users": LEADERBOARD_CACHE["total_users"],
+                    "total_pages": LEADERBOARD_CACHE["total_pages"],
                     "leaderboard": LEADERBOARD_CACHE["data"][:limit],
                 }
             ),
@@ -96,12 +111,12 @@ def get_leaderboard():
             }
         )
 
-    # Guardar en cache si es la primera página
+    # Guardar en cache los datos y totales si es la primera página
     if page == 1:
         LEADERBOARD_CACHE["data"] = ranking
-        LEADERBOARD_CACHE["expires_at"] = (
-            now + CACHE_TTL_SECONDS
-        )
+        LEADERBOARD_CACHE["total_users"] = pagination.total
+        LEADERBOARD_CACHE["total_pages"] = pagination.pages
+        LEADERBOARD_CACHE["expires_at"] = now + CACHE_TTL_SECONDS
 
     return (
         jsonify(

@@ -7,3 +7,4 @@ python-dotenv==1.1.1
 PyJWT
 Flask-SocketIO 
 python-socketio
+flasgger
