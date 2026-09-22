@@ -2,11 +2,14 @@ from flask import Flask
 
 from src.config import Config
 from src.extensions import db, migrate, sock
+from src.cli import register_cli_commands
+
 import src.models
 
 
 def create_app(config_class: type[Config] = Config) -> Flask:
     app = Flask(__name__)
+
     app.config.from_object(config_class)
 
     db.init_app(app)
@@ -19,9 +22,6 @@ def create_app(config_class: type[Config] = Config) -> Flask:
     register_routes(app)
     register_realtime_routes(sock)
 
-    @app.cli.command("seed")
-    def seed_command():
-        from src.seeds import seed_db
-        seed_db()
+    register_cli_commands(app)
 
     return app
