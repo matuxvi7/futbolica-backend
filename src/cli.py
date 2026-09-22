@@ -110,3 +110,39 @@ def register_cli_commands(app: Flask) -> None:
             f"{'✅ VÁLIDO' if res3['valid'] else '❌ INVÁLIDO'} "
             f"({res3.get('label') or res3.get('reason')})"
         )
+
+    @app.cli.command("generate-puzzle")
+    def generate_puzzle_command():
+        """Genera y muestra un enigma dinámico con rango de dificultad."""
+
+        from src.services.puzzle_generator import generate_match_puzzle
+
+        print("🎲 Generando enigma dinámico para partida 1v1...")
+
+        puzzle = generate_match_puzzle(
+            entity_type="player",
+            min_distance=2,
+            max_distance=5,
+        )
+
+        if puzzle:
+            print("✅ ¡Enigma generado con éxito!")
+            print(f"   ID Enigma: {puzzle['puzzle_id']}")
+            print(f"   Dificultad: {puzzle['difficulty'].upper()}")
+            print(f"   Origen: 🟢 {puzzle['start_node']['name']}")
+            print(f"   Destino: 🔴 {puzzle['target_node']['name']}")
+            print(
+                f"   Distancia óptima: "
+                f"{puzzle['optimal_distance']} pasos"
+            )
+
+            print("   Solución esperada:")
+
+            for step in puzzle["solution_path"]:
+                print(f"      ➡️ {step['label']}")
+
+        else:
+            print(
+                "❌ No se pudo generar un enigma "
+                "con los candidatos actuales."
+            )
